@@ -1,5 +1,8 @@
 ChangeLog
 
+2.0.5
+	Changed active scene to only be in the Space Center
+
 2.0.4
 	Added Close button
 	Updated pre/post build steps

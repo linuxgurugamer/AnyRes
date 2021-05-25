@@ -9,7 +9,7 @@ using ClickThroughFix;
 namespace AnyRes
 {
 
-	[KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
+	[KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
 	public class AnyRes : MonoBehaviour
 	{
 
