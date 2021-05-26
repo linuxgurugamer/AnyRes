@@ -18,7 +18,7 @@ namespace AnyRes
 
         public static LEVEL level = LEVEL.INFO;
 
-        private static readonly String PREFIX = "ToolbarControl" + ": ";
+        private static readonly String PREFIX = "AnyRes" + ": ";
 
         public static LEVEL GetLevel()
         {
