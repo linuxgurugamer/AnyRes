@@ -1,5 +1,9 @@
 ChangeLog
 
+2.0.7
+	Added code to set res to last set resolution at every scene change
+	Added code to set resoltuion when application gains focus, usually after alt-tabbing away and then back
+
 2.0.6
 	Fixed log prefix
 	Added code to reset screen res at main menu, first time.  This will fix the issues with KSP sometimes forgetting the last set resolution when exiting the game

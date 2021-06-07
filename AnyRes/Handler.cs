@@ -10,17 +10,16 @@ using ClickThroughFix;
 namespace AnyRes
 {
 
-    [KSPAddon(KSPAddon.Startup.MainMenu, false)]
     public class SetInitialRes : MonoBehaviour
     {
         internal static string dirPath;
         static bool initialResSet = false;
-
-        void Start()
+        internal static ConfigNode LastSetRes = null;
+        internal void DoStart(bool initial)
         {
             if (!initialResSet)
             {
-                initialResSet = true;
+                initialResSet = initial;
                 Log.Info("SetInitialRes");
                 dirPath = KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/";
 
@@ -28,13 +27,48 @@ namespace AnyRes
                 var files = AnyRes.UpdateFilesList(true);
                 if (files.Length == 1)
                 {
-                    ConfigNode config = ConfigNode.Load(files[0]);
-
-                    AnyRes.SetScreenRes(config, false);
+                    LastSetRes = ConfigNode.Load(files[0]);
                 }
             }
+            if (LastSetRes != null)
+                    AnyRes.SetScreenRes(LastSetRes, false);
+                
+            
         }
     }
+    [KSPAddon(KSPAddon.Startup.Instantly, false)]
+    public class SetInitialResInstant:SetInitialRes
+    {
+        void Start()
+        {
+            DoStart(true);
+        }
+    }
+
+    [KSPAddon(KSPAddon.Startup.MainMenu, false)]
+    public class SetInitialResMainMenu : SetInitialRes
+    {
+        void Start()
+        {
+            DoStart(false);
+        }
+    }
+
+
+    [KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
+    public class AllGameScenesResMainMenu : SetInitialRes
+    {
+        void Start()
+        {
+            DoStart(false);           
+        }
+
+        void OnApplicationFocus(bool hasFocus)
+        {
+            DoStart(false);
+        }
+    }
+
 
 
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
@@ -340,7 +374,14 @@ namespace AnyRes
             GameSettings.FULLSCREEN = fullscreen;
             Screen.SetResolution(xVal, yVal, fullscreen);
             if (saveConfig)
+            {
                 SaveConfig(LASTSETRES, xVal.ToString(), yVal.ToString(), fullscreen);
+                var files = UpdateFilesList(true);
+                if (files.Length == 1)
+                {
+                    SetInitialRes.LastSetRes = ConfigNode.Load(files[0]);
+                }
+            }
         }
 
         static void SaveConfig(string newName, string newX, string newY, bool newFullscreen)
