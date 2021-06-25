@@ -264,6 +264,10 @@ namespace AnyRes
                         GameSettings.FULLSCREEN = fullScreen;
                         GameSettings.SaveSettings();
                         Screen.SetResolution(x, y, fullScreen);
+
+                        SaveDataConfig(x, y, fullScreen);
+
+
                         Debug.Log("[AnyRes] Set screen resolution");
                     }
                     else
@@ -375,13 +379,27 @@ namespace AnyRes
             Screen.SetResolution(xVal, yVal, fullscreen);
             if (saveConfig)
             {
+                SaveDataConfig(xVal, yVal, fullscreen);
+#if false
                 SaveConfig(LASTSETRES, xVal.ToString(), yVal.ToString(), fullscreen);
                 var files = UpdateFilesList(true);
                 if (files.Length == 1)
                 {
                     SetInitialRes.LastSetRes = ConfigNode.Load(files[0]);
                 }
+#endif
             }
+        }
+
+        static void SaveDataConfig(int xVal, int yVal, bool fullscreen)
+        {
+            SaveConfig(LASTSETRES, xVal.ToString(), yVal.ToString(), fullscreen);
+            var files = UpdateFilesList(true);
+            if (files.Length == 1)
+            {
+                SetInitialRes.LastSetRes = ConfigNode.Load(files[0]);
+            }
+
         }
 
         static void SaveConfig(string newName, string newX, string newY, bool newFullscreen)
