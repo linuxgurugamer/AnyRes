@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Text.RegularExpressions;  //Get Regex
 using KSP.UI.Screens;
+
+using System.Runtime.InteropServices;
+
 using ToolbarControl_NS;
 using ClickThroughFix;
 
@@ -102,38 +106,6 @@ namespace AnyRes
             }
         }
 
-#if false
-        void Update()
-        {
-
-            //Thanks bananashavings http://forum.kerbalspaceprogram.com/index.php?/profile/156147-bananashavings/ - https://gist.github.com/bananashavings/e698f4359e1628b5d6ef
-            //Also thanks to Crzyrndm for the fix to that code!
-            //(HighLogic.LoadedScene == GameScenes.TRACKSTATION || HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.EDITOR)
-
-            if ((GameSettings.MODIFIER_KEY.GetKey()) && Input.GetKeyDown(KeyCode.Slash))
-            {
-
-                windowEnabled = !windowEnabled;
-                if (ApplicationLauncher.Ready)
-                {
-
-                    if (toolbarControl != null)
-                    {
-                        if (windowEnabled)
-                        {
-
-                            toolbarControl.SetTrue(true);
-
-                        }
-                        else
-                        {
-                            toolbarControl.SetFalse(true);
-                        }
-                    }
-                }
-            }
-        }
-#endif
 
         void OnGUI()
         {
@@ -165,132 +137,154 @@ namespace AnyRes
         {
             GUILayout.BeginHorizontal();
 
-            GUILayout.BeginVertical();
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Name: ");
-            nameString = GUILayout.TextField(nameString);
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Width: ");
-            xString = GUILayout.TextField(xString);
-            xString = Regex.Replace(xString, @"[^0-9]", "");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Height: ");
-            yString = GUILayout.TextField(yString);
-            yString = Regex.Replace(yString, @"[^0-9]", "");
-            GUILayout.EndHorizontal();
-            fullScreen = GUILayout.Toggle(fullScreen, "Fullscreen");
-            //			reloadScene = GUILayout.Toggle (reloadScene, "Reload scene");
-            if (GUILayout.Button("Set Screen Resolution"))
+            using (new GUILayout.VerticalScope())
             {
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Label("Name: ");
+                    nameString = GUILayout.TextField(nameString);
+                }
 
-                if (xString != null && yString != null)
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Label("Width: ");
+                    xString = GUILayout.TextField(xString);
+                    xString = Regex.Replace(xString, @"[^0-9]", "");
+                }
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Label("Height: ");
+                    yString = GUILayout.TextField(yString);
+                    yString = Regex.Replace(yString, @"[^0-9]", "");
+                }
+                fullScreen = GUILayout.Toggle(fullScreen, "Fullscreen");
+                //			reloadScene = GUILayout.Toggle (reloadScene, "Reload scene");
+                if (GUILayout.Button("Set Screen Resolution"))
                 {
 
-                    x = Convert.ToInt32(xString);
-                    y = Convert.ToInt32(yString);
-
-                    if (x > 0 && y > 0)
+                    if (xString != null && yString != null)
                     {
 
-                        GameSettings.SCREEN_RESOLUTION_HEIGHT = y;
-                        GameSettings.SCREEN_RESOLUTION_WIDTH = x;
-                        GameSettings.FULLSCREEN = fullScreen;
-                        GameSettings.SaveSettings();
-                        Screen.SetResolution(x, y, fullScreen);
+                        x = Convert.ToInt32(xString);
+                        y = Convert.ToInt32(yString);
 
-                        SaveDataConfig(x, y, fullScreen);
+                        if (x > 0 && y > 0)
+                        {
+
+                            GameSettings.SCREEN_RESOLUTION_HEIGHT = y;
+                            GameSettings.SCREEN_RESOLUTION_WIDTH = x;
+                            GameSettings.FULLSCREEN = fullScreen;
+                            GameSettings.SaveSettings();
+                            Screen.SetResolution(x, y, fullScreen);
+
+                            SaveDataConfig(x, y, fullScreen);
 
 
-                        Debug.Log("[AnyRes] Set screen resolution");
+                            Debug.Log("[AnyRes] Set screen resolution");
+                        }
+                        else
+                        {
+
+                            ScreenMessages.PostScreenMessage("One or both of your values is too small.  Please enter a valid value.", 1, ScreenMessageStyle.UPPER_CENTER);
+                        }
                     }
                     else
                     {
-
-                        ScreenMessages.PostScreenMessage("One or both of your values is too small.  Please enter a valid value.", 1, ScreenMessageStyle.UPPER_CENTER);
+                        ScreenMessages.PostScreenMessage("The values you have set are invalid.  Please set a valid value.", 1, ScreenMessageStyle.UPPER_CENTER);
                     }
+
                 }
+                if (nameString == "")
+                    GUI.enabled = false;
+                if (GUILayout.Button("Save"))
+                {
+                    var newName = nameString;
+                    var newX = xString;
+                    var newY = yString;
+                    var newFullscreen = fullScreen;
+
+                    SaveConfig(newName, newX, newY, newFullscreen);
+                    ScreenMessages.PostScreenMessage("Preset saved.  You can change the preset later by using the same name in this editor.", 5, ScreenMessageStyle.UPPER_CENTER);
+                    files = UpdateFilesList();
+
+                }
+
+
+                if (files.Length == 0)
+                    GUI.enabled = false;
                 else
-                {
-                    ScreenMessages.PostScreenMessage("The values you have set are invalid.  Please set a valid value.", 1, ScreenMessageStyle.UPPER_CENTER);
-                }
-
-            }
-
-            if (nameString == "")
-                GUI.enabled = false;
-            if (GUILayout.Button("Save"))
-            {
-                var newName = nameString;
-                var newX = xString;
-                var newY = yString;
-                var newFullscreen = fullScreen;
-
-                SaveConfig(newName, newX, newY, newFullscreen);
-                ScreenMessages.PostScreenMessage("Preset saved.  You can change the preset later by using the same name in this editor.", 5, ScreenMessageStyle.UPPER_CENTER);
-                files = UpdateFilesList();
-
-            }
-
-
-            if (files.Length == 0)
-                GUI.enabled = false;
-            else
-                GUI.enabled = true;
-            if (deleteEnabled)
-            {
-                if (GUILayout.Button("Disable Delete"))
-                {
-                    deleteEnabled = false;
-                }
-
-            }
-            else
-            {
-                if (GUILayout.Button("Enable Delete"))
-                {
-                    deleteEnabled = true;
-                }
-            }
-            if (GUILayout.Button("Close"))
-            {
-                toolbarControl.SetFalse(true);
-            }
-            GUILayout.EndVertical();
-            GUILayout.BeginVertical();
-
-            scrollViewPos = GUILayout.BeginScrollView(scrollViewPos);
-            for (int i = files.Length - 1; i >= 0; --i)
-            {
-
-                file = files[i];
-
-                ConfigNode config = ConfigNode.Load(file);
+                    GUI.enabled = true;
                 if (deleteEnabled)
                 {
-                    if (GUILayout.Button("Delete " + config.GetValue("name")))
+                    if (GUILayout.Button("Disable Delete"))
                     {
-                        confirmDeleteEnabled = true;
-                        deleteFile = file;
-                        deleteFileName = config.GetValue("name");
+                        deleteEnabled = false;
                     }
 
                 }
                 else
                 {
-                    if (GUILayout.Button(config.GetValue("name")))
+                    if (GUILayout.Button("Enable Delete"))
                     {
-                        SetScreenRes(config);
-                        GameSettings.SaveSettings();
-
-                        Debug.Log("[AnyRes] Set screen resolution from preset");
+                        deleteEnabled = true;
                     }
                 }
+
+                if (HighLogic.CurrentGame.Parameters.CustomParams<AR>().saveWinPos)
+                {
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        if (GUILayout.Button("Save Win Pos"))
+                        {
+                            SaveWinPos();
+                        }
+
+                        if (GUILayout.Button("Clear Win Pos"))
+                        {
+                            SaveWinPos(clear: true);
+                        }
+                    }
+                }
+
+
+                if (GUILayout.Button("Close"))
+                {
+                    toolbarControl.SetFalse(true);
+                }
             }
-            GUILayout.EndScrollView();
-            GUILayout.EndVertical();
+
+            using (new GUILayout.VerticalScope())
+            {
+                scrollViewPos = GUILayout.BeginScrollView(scrollViewPos);
+                for (int i = files.Length - 1; i >= 0; --i)
+                {
+
+                    file = files[i];
+
+                    ConfigNode config = ConfigNode.Load(file);
+                    if (deleteEnabled)
+                    {
+                        if (GUILayout.Button("Delete " + config.GetValue("name")))
+                        {
+                            confirmDeleteEnabled = true;
+                            deleteFile = file;
+                            deleteFileName = config.GetValue("name");
+                        }
+
+                    }
+                    else
+                    {
+                        if (GUILayout.Button(config.GetValue("name")))
+                        {
+                            SetScreenRes(config);
+                            GameSettings.SaveSettings();
+
+                            Debug.Log("[AnyRes] Set screen resolution from preset");
+                        }
+                    }
+                }
+                GUILayout.EndScrollView();
+            }
             GUILayout.EndHorizontal();
 
             if (GUI.Button(new Rect(anyresWinRect.width - 18, 3f, 15f, 15f), new GUIContent("X")))
@@ -347,6 +341,33 @@ namespace AnyRes
             config.AddValue("fullscreen", newFullscreen.ToString());
             config.Save(KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/" + newName + ".cfg");
         }
+
+        internal static string WinPosFileName(string WinPosName)
+        {
+            return KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/" + WinPosName + ".cfg";
+
+        }
+
+        void SaveWinPos(string WinPosName = "WINPOS", bool clear = false)
+        {
+            if (!clear)
+            {
+                IntPtr hWnd = FindWindow(null, Application.productName);
+
+                GetWindowRect(hWnd, ref rect);
+
+                ConfigNode config = new ConfigNode(WinPosName);
+                config.AddValue("name", "WINPOS");
+                config.AddValue("left", rect.Left);
+                config.AddValue("top", rect.Top);
+                config.Save(WinPosFileName(WinPosName));
+            }
+            else
+                if (File.Exists(WinPosFileName(WinPosName)))
+                File.Delete(WinPosFileName(WinPosName));
+        }
+
+
         void ConfirmDelete(int id)
         {
             GUILayout.BeginHorizontal();
@@ -391,6 +412,40 @@ namespace AnyRes
             }
             return flist.ToArray();
         }
+
+        //////////////////////////////////////////////////////////////////////
+        ///
+
+        // ******************************** user32.dll FindWindow, SetWindowPosition ******************
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="className"></param>
+        /// <param name="windowName"></param>
+        /// <returns></returns>
+        [DllImport("user32.dll", EntryPoint = "FindWindow")]
+        public static extern IntPtr FindWindow(string className, string windowName);
+
+        // ******************************** user32.dll GetWindowRect ******************
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="hWnd"></param>
+        /// <param name="lpRect"></param>
+        /// <returns></returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetWindowRect(IntPtr hWnd, ref RECT lpRect);
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        static RECT rect = new RECT();
     }
 }
 

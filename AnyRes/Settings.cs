@@ -25,6 +25,11 @@ namespace AnyRes
         [GameParameters.CustomParameterUI("Use KSP Skin")]
         public bool useKSPSkin = true;
 
+        [GameParameters.CustomParameterUI("Save Game Window position", 
+            toolTip ="Adds a button to save current window position, will be restored at KSP restart")]
+        public bool saveWinPos = true;
+
+
 
 
         public override void SetDifficultyPreset(GameParameters.Preset preset)
