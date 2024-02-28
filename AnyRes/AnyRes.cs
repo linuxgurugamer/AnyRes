@@ -38,7 +38,7 @@ namespace AnyRes
 
         public bool windowEnabled = false;
         public bool fullScreen = true;
-        public static double highestUIscale = 0.0f;
+        public static double highestUIscale = 1+.0f;
 
         ToolbarControl toolbarControl;
 
@@ -53,11 +53,6 @@ namespace AnyRes
 
         void Start()
         {
-
-            xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
-            yString = (GameSettings.SCREEN_RESOLUTION_HEIGHT).ToString();
-            sString = GameSettings.UI_SCALE.ToString();
-            fullScreen = GameSettings.FULLSCREEN;
 
             files = UpdateFilesList();
 
@@ -76,6 +71,11 @@ namespace AnyRes
                       "AnyRes/textures/Toolbar_32",
                       "AnyRes/textures/Toolbar_24",
                       MODNAME);
+
+            xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
+            yString = (GameSettings.SCREEN_RESOLUTION_HEIGHT).ToString();
+            sString = GameSettings.UI_SCALE.ToString();
+            fullScreen = GameSettings.FULLSCREEN;
 
         }
 
@@ -194,6 +194,11 @@ namespace AnyRes
                             SaveDataConfig(x, y, s, fullScreen);
 
                             Debug.Log("[AnyRes] Set screen resolution");
+
+                            xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
+                            yString = (GameSettings.SCREEN_RESOLUTION_HEIGHT).ToString();
+                            sString = GameSettings.UI_SCALE.ToString();
+                            fullScreen = GameSettings.FULLSCREEN;
                         }
                         else
                         {
@@ -290,6 +295,12 @@ namespace AnyRes
                         {
                             Debug.Log("[AnyRes] Preset Button: Set screen resolution and UI Scaling"); // Debug
                             SetScreenRes(config);
+
+                            nameString = GUILayout.TextField(config.GetValue("name"));
+                            xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
+                            yString = (GameSettings.SCREEN_RESOLUTION_HEIGHT).ToString();
+                            sString = GameSettings.UI_SCALE.ToString();
+                            fullScreen = GameSettings.FULLSCREEN;
                         }
                     }
                 }
