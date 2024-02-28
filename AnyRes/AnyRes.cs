@@ -38,7 +38,7 @@ namespace AnyRes
 
         public bool windowEnabled = false;
         public bool fullScreen = true;
-        public static double highestUIscale = 1+.0f;
+        public static double highestUIscale = 1.0f;
 
         ToolbarControl toolbarControl;
 
