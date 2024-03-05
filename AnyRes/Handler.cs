@@ -24,9 +24,11 @@ namespace AnyRes
 
 
                 var files = AnyRes.UpdateFilesList(true);
+                if (files == null)
+                    Log.Error("files is null");
                 if (files.Length == 1)
                 {
-                    LastSetRes = ConfigNode.Load(files[0]);
+                    LastSetRes = files[0].node;
                 }
             }
             if (LastSetRes != null)

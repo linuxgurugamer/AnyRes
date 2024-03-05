@@ -37,7 +37,15 @@ namespace AnyRes
 
         ToolbarControl toolbarControl;
 
-        string[] files;
+        internal class ResConfig
+        {
+            internal string file;
+            internal ConfigNode node = new ConfigNode();
+        }
+        //static string[] files;
+
+        internal static ResConfig[] resConfigs;
+
         string file = "";
         string deleteFile = "";
         string deleteFileName = "";
@@ -64,7 +72,7 @@ namespace AnyRes
             yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
             fullScreen = GameSettings.FULLSCREEN;
 
-            files = UpdateFilesList();
+            resConfigs = UpdateFilesList();
 
             Log.Info("SceneLoaded, scene: " + HighLogic.LoadedScene);
             toolbarControl = gameObject.AddComponent<ToolbarControl>();
@@ -205,12 +213,12 @@ namespace AnyRes
 
                     SaveConfig(newName, newX, newY, newFullscreen);
                     ScreenMessages.PostScreenMessage("Preset saved.  You can change the preset later by using the same name in this editor.", 5, ScreenMessageStyle.UPPER_CENTER);
-                    files = UpdateFilesList();
+                    resConfigs = UpdateFilesList();
 
                 }
 
 
-                if (files.Length == 0)
+                if (resConfigs.Length == 0)
                     GUI.enabled = false;
                 else
                     GUI.enabled = true;
@@ -256,27 +264,23 @@ namespace AnyRes
             using (new GUILayout.VerticalScope())
             {
                 scrollViewPos = GUILayout.BeginScrollView(scrollViewPos);
-                for (int i = files.Length - 1; i >= 0; --i)
+                for (int i = resConfigs.Length - 1; i >= 0; --i)
                 {
-
-                    file = files[i];
-
-                    ConfigNode config = ConfigNode.Load(file);
                     if (deleteEnabled)
                     {
-                        if (GUILayout.Button("Delete " + config.GetValue("name")))
+                        if (GUILayout.Button("Delete " + resConfigs[i].node.GetValue("name")))
                         {
                             confirmDeleteEnabled = true;
-                            deleteFile = file;
-                            deleteFileName = config.GetValue("name");
+                            deleteFile = resConfigs[i].file;
+                            deleteFileName = resConfigs[i].node.GetValue("name");
                         }
 
                     }
                     else
                     {
-                        if (GUILayout.Button(config.GetValue("name")))
+                        if (GUILayout.Button(resConfigs[i].node.GetValue("name")))
                         {
-                            SetScreenRes(config);
+                            SetScreenRes(resConfigs[i].node);
                             GameSettings.SaveSettings();
 
                             Debug.Log("[AnyRes] Set screen resolution from preset");
@@ -327,7 +331,8 @@ namespace AnyRes
             var files = UpdateFilesList(true);
             if (files.Length == 1)
             {
-                SetInitialRes.LastSetRes = ConfigNode.Load(files[0]);
+                SetInitialRes.LastSetRes = resConfigs[0].node;
+
             }
 
         }
@@ -387,31 +392,39 @@ namespace AnyRes
                 //deleteEnabled = false;
                 confirmDeleteEnabled = false;
                 System.IO.File.Delete(deleteFile);
-                files = UpdateFilesList();
+                resConfigs = UpdateFilesList();
             }
             GUILayout.EndHorizontal();
         }
 
-        internal static string[] UpdateFilesList(bool LastRes = false)
+        internal static ResConfig[] UpdateFilesList(bool LastRes = false)
         {
             var files = Directory.GetFiles(SetInitialRes.dirPath, "*.cfg");
-            List<string> flist = new List<string>();
+            List<ResConfig> flist = new List<ResConfig>();
+            
+
             foreach (var f in files)
             {
-                Log.Info("file: " + f);
+                ResConfig cfg = new ResConfig();
+
+                cfg.file = f;
+                cfg.node = ConfigNode.Load(f);
+
                 if (LastRes)
                 {
                     if (f == (SetInitialRes.dirPath + LASTSETRES + ".cfg"))
-                        flist.Add(f);
+                        flist.Add(cfg);
                 }
                 else
                 {
                     if (f != (SetInitialRes.dirPath + LASTSETRES + ".cfg"))
-                        flist.Add(f);
+                        flist.Add(cfg);
                 }
             }
+
             return flist.ToArray();
         }
+
 
         //////////////////////////////////////////////////////////////////////
         ///

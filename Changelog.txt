@@ -1,5 +1,8 @@
 ChangeLog
 
+2.0.9
+	Fixed performance issue when window was left open
+
 2.0.8
 	Added new option to save game window position (currently only 1 position saved)
 	Added option to settings page to enable/disable the buttons for saving the game window
