@@ -183,6 +183,7 @@ namespace AnyRes
                             GameSettings.SCREEN_RESOLUTION_WIDTH = x;
                             GameSettings.FULLSCREEN = fullScreen;
                             GameSettings.SaveSettings();
+                            Log.Info("GUIActive.SetResolution, x: " + x + ", y: " + y + ", fullScreen: " + fullScreen);
                             Screen.SetResolution(x, y, fullScreen);
 
                             SaveDataConfig(x, y, fullScreen);
@@ -281,6 +282,7 @@ namespace AnyRes
                         if (GUILayout.Button(resConfigs[i].node.GetValue("name")))
                         {
                             SetScreenRes(resConfigs[i].node);
+                            SetInitialRes.LastSetRes = resConfigs[i].node;
                             GameSettings.SaveSettings();
 
                             Debug.Log("[AnyRes] Set screen resolution from preset");
@@ -310,6 +312,7 @@ namespace AnyRes
             GameSettings.SCREEN_RESOLUTION_HEIGHT = yVal;
             GameSettings.SCREEN_RESOLUTION_WIDTH = xVal;
             GameSettings.FULLSCREEN = fullscreen;
+            Log.Info("SetScreenRes.SetResolution, xVal: " + xVal + ", yVal: " + yVal + ", fullscreen: " + fullscreen);
             Screen.SetResolution(xVal, yVal, fullscreen);
             if (saveConfig)
             {

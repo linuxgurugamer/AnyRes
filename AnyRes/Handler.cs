@@ -14,12 +14,12 @@ namespace AnyRes
         internal static string dirPath;
         static bool initialResSet = false;
         internal static ConfigNode LastSetRes = null;
+
         internal void DoStart(bool initial)
         {
             if (!initialResSet)
             {
                 initialResSet = initial;
-                Log.Info("SetInitialRes");
                 dirPath = KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/";
 
 
@@ -32,7 +32,9 @@ namespace AnyRes
                 }
             }
             if (LastSetRes != null)
+            {
                 AnyRes.SetScreenRes(LastSetRes, false);
+            }
             LoadWinPos();
         }
 

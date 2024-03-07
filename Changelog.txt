@@ -1,5 +1,7 @@
 ChangeLog
 
+2.0.9.1
+	Fixed error induced by previous fix, where the screen was being reset upon reentering after changing screen, due to a variable not being set properly.  
 
 2.0.9
 	Fixed performance issue when window was left open
