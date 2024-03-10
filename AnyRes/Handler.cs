@@ -4,7 +4,6 @@ using UnityEngine;
 using System.IO;
 
 using System.Runtime.InteropServices;
-using UnityEngine.SceneManagement;
 
 
 namespace AnyRes
@@ -15,22 +14,27 @@ namespace AnyRes
         internal static string dirPath;
         static bool initialResSet = false;
         internal static ConfigNode LastSetRes = null;
+
         internal void DoStart(bool initial)
         {
             if (!initialResSet)
             {
                 initialResSet = initial;
-                Log.Info("SetInitialRes");
                 dirPath = KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/";
 
+
                 var files = AnyRes.UpdateFilesList(true);
+                if (files == null)
+                    Log.Error("files is null");
                 if (files.Length == 1)
                 {
-                    LastSetRes = ConfigNode.Load(files[0]);
+                    LastSetRes = files[0].node;
                 }
             }
             if (initial & LastSetRes != null)
+            {
                 AnyRes.SetScreenRes(LastSetRes, false);
+            }
             LoadWinPos();
         }
 
@@ -124,7 +128,5 @@ namespace AnyRes
         {
             DoStart(false);
         }
-    
     }
-
 }
