@@ -207,6 +207,7 @@ namespace AnyRes
                             GameSettings.SaveSettings();
                             GameSettings.ApplySettings();
                             Log.Info("GUIActive.SetResolution, x: " + x + ", y: " + y + ", s: " + s + ", fullScreen: " + fullScreen);
+
                             Screen.SetResolution(x, y, fullScreen);
 
                             SaveDataConfig(x, y, s, fullScreen);
@@ -350,6 +351,7 @@ namespace AnyRes
             GameSettings.UI_SCALE = sVal;
             GameSettings.FULLSCREEN = fullscreen;
             Log.Info("SetScreenRes.SetResolution, xVal: " + xVal + ", yVal: " + yVal + ", fullscreen: " + fullscreen);
+
             Screen.SetResolution(xVal, yVal, fullscreen);
             GameSettings.SaveSettings();
             GameSettings.ApplySettings();
