@@ -63,35 +63,20 @@ namespace AnyRes
             Log.Info("SceneLoaded, scene: " + HighLogic.LoadedScene);
             Debug.Log("[AnyRes] OnStart() Scene Loaded: " + HighLogic.LoadedScene);
 
-            // if lastResConfig file does not exist, create it
-            string lastResConfigFILE = (SetInitialRes.dirPath + LASTSETRES + ".cfg");
-            if (!File.Exists(lastResConfigFILE))
+            // if scene config file does not exist, create it based on current values
+            string sceneConfigFile = SetInitialRes.dirPath + HighLogic.LoadedScene + ".cfg";
+            if (!File.Exists(sceneConfigFile))
             {
-                Debug.Log("[AnyRes] Creating lastResConfig file");
-                ResConfig newLastResConfig = new ResConfig();
+                Debug.Log("[AnyRes] Creating " + HighLogic.LoadedScene + " config file");
                 xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
                 yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
                 sString = GameSettings.UI_SCALE.ToString();
                 fullScreen = GameSettings.FULLSCREEN;
-                SaveConfig(LASTSETRES, xString, yString, sString, fullScreen);
-            }
-
-            // if scene config file does not exist, copy LastSetRes.cfg to <SCENE>.cfg
-            string sceneConfigFile = SetInitialRes.dirPath + HighLogic.LoadedScene + ".cfg";
-            if (File.Exists(sceneConfigFile))
-            {
-                Debug.Log("[AnyRes] Setting SCENE config for " + HighLogic.LoadedScene);
-                SetScreenRes(ConfigNode.Load(sceneConfigFile), false);
-            } else {
-                Debug.Log("[AnyRes] Creating " + HighLogic.LoadedScene + " config file");
-                var files = AnyRes.UpdateFilesList(true);
-                ConfigNode LastSetRes = files[0].node;
-                xString = LastSetRes.GetValue("x");
-                yString = LastSetRes.GetValue("y");
-                sString = LastSetRes.GetValue("scale");
-                fullScreen = bool.Parse(LastSetRes.GetValue("fullscreen"));
                 SaveConfig(HighLogic.LoadedScene + "", xString, yString, sString, fullScreen);
             }
+
+            Debug.Log("[AnyRes] Setting SCENE config for " + HighLogic.LoadedScene);
+            SetScreenRes(ConfigNode.Load(sceneConfigFile), true);
 
             resConfigs = UpdateFilesList();
 
@@ -394,14 +379,15 @@ namespace AnyRes
             if (saveConfig)
             {
                 SaveDataConfig(xVal, yVal, sVal, fullscreen);
+
             }
         }
 
         static void SaveDataConfig(int xVal, int yVal, float sVal, bool fullscreen)
         {
             SaveConfig(LASTSETRES, xVal.ToString(), yVal.ToString(), sVal.ToString(), fullscreen);
-            var files = UpdateFilesList(true);
-            if (files.Length == 1)
+            var resConfigs = UpdateFilesList(true);
+            if (resConfigs.Length == 1)
             {
                 SetInitialRes.LastSetRes = resConfigs[0].node;
 
@@ -417,7 +403,8 @@ namespace AnyRes
             config.AddValue("y", newY);
             config.AddValue("scale", newS);
             config.AddValue("fullscreen", newFullscreen.ToString());
-            config.Save(KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/" + newName + ".cfg");
+            config.Save(KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/" + newName + ".cfg"); 
+
         }
 
         internal static string WinPosFileName(string WinPosName)
