@@ -20,8 +20,8 @@ namespace AnyRes
     public class AnyRes : MonoBehaviour
     {
 
-        public static Rect anyresWinRect = new Rect(35, 99, 400, 320);
-        public Rect deleteRect = new Rect((Screen.width - 200) / 2, (Screen.height - 100) / 2, 200, 120);
+        public static Rect anyresWinRect = new Rect(35, 99, 420, 370);
+        public Rect deleteRect = new Rect((Screen.width - 200) / 2, (Screen.height - 100) / 2, 200, 150);
 
         public string nameString = "";
         public string xString = "1280";
@@ -59,23 +59,43 @@ namespace AnyRes
 
         void Start()
         {
-#if false
-            if (HighLogic.LoadedScene == GameScenes.EDITOR)
-            {
-
-                anyresWinRect.x = Screen.width - 272;
-                anyresWinRect.y = Screen.height - 231;
-
-            }
-            Debug.Log ("[AnyRes] Loaded, scene: " + HighLogic.LoadedScene);
-#endif
-
-            resConfigs = UpdateFilesList();
 
             Log.Info("SceneLoaded, scene: " + HighLogic.LoadedScene);
             Debug.Log("[AnyRes] OnStart() Scene Loaded: " + HighLogic.LoadedScene);
-            SetScreenRes(ConfigNode.Load(SetInitialRes.dirPath + HighLogic.LoadedScene + ".cfg"), true);
 
+            // if lastResConfig file does not exist, create it
+            string lastResConfigFILE = (SetInitialRes.dirPath + LASTSETRES + ".cfg");
+            if (!File.Exists(lastResConfigFILE))
+            {
+                Debug.Log("[AnyRes] Creating lastResConfig file");
+                ResConfig newLastResConfig = new ResConfig();
+                xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
+                yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
+                sString = GameSettings.UI_SCALE.ToString();
+                fullScreen = GameSettings.FULLSCREEN;
+                SaveConfig(LASTSETRES, xString, yString, sString, fullScreen);
+            }
+
+            // if scene config file does not exist, copy LastSetRes.cfg to <SCENE>.cfg
+            string sceneConfigFile = SetInitialRes.dirPath + HighLogic.LoadedScene + ".cfg";
+            if (File.Exists(sceneConfigFile))
+            {
+                Debug.Log("[AnyRes] Setting SCENE config for " + HighLogic.LoadedScene);
+                SetScreenRes(ConfigNode.Load(sceneConfigFile), false);
+            } else {
+                Debug.Log("[AnyRes] Creating " + HighLogic.LoadedScene + " config file");
+                var files = AnyRes.UpdateFilesList(true);
+                ConfigNode LastSetRes = files[0].node;
+                xString = LastSetRes.GetValue("x");
+                yString = LastSetRes.GetValue("y");
+                sString = LastSetRes.GetValue("scale");
+                fullScreen = bool.Parse(LastSetRes.GetValue("fullscreen"));
+                SaveConfig(HighLogic.LoadedScene + "", xString, yString, sString, fullScreen);
+            }
+
+            resConfigs = UpdateFilesList();
+
+            Debug.Log("[AnyRes] Creating Toolbar for scene " + HighLogic.LoadedScene);
             toolbarControl = gameObject.AddComponent<ToolbarControl>();
             toolbarControl.AddToAllToolbars(OnTrue, OnFalse,
                       ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW |
@@ -88,6 +108,7 @@ namespace AnyRes
                       "AnyRes/textures/Toolbar_24",
                       MODNAME);
 
+            nameString = HighLogic.LoadedScene + "";
             xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
             yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
             sString = GameSettings.UI_SCALE.ToString();
@@ -181,7 +202,7 @@ namespace AnyRes
                 }
                 using (new GUILayout.HorizontalScope())
                 {
-                    GUILayout.Label("UI_Scale: ");
+                    GUILayout.Label("UI Scale: ");
                     sString = GUILayout.TextField(sString);
                     sString = Regex.Replace(sString, @"[^0-9\.]", "");
                 }
@@ -207,7 +228,6 @@ namespace AnyRes
                             GameSettings.SaveSettings();
                             GameSettings.ApplySettings();
                             Log.Info("GUIActive.SetResolution, x: " + x + ", y: " + y + ", s: " + s + ", fullScreen: " + fullScreen);
-
                             Screen.SetResolution(x, y, fullScreen);
 
                             SaveDataConfig(x, y, s, fullScreen);
@@ -233,7 +253,7 @@ namespace AnyRes
                 }
                 if (nameString == "")
                     GUI.enabled = false;
-                if (GUILayout.Button("Save"))
+                if (GUILayout.Button("Save as: " + nameString))
                 {
                     var newName = nameString;
                     var newX = xString;
@@ -247,6 +267,22 @@ namespace AnyRes
 
                 }
 
+                if (nameString != HighLogic.LoadedScene + "")
+                {
+                    if (GUILayout.Button("Save as: " + HighLogic.LoadedScene))
+                    {
+                        var newName = HighLogic.LoadedScene + "";
+                        var newX = xString;
+                        var newY = yString;
+                        var newS = sString;
+                        var newFullscreen = fullScreen;
+
+                        SaveConfig(newName, newX, newY, newS, newFullscreen);
+                        ScreenMessages.PostScreenMessage("Preset saved to current scene: " + HighLogic.LoadedScene, 5, ScreenMessageStyle.UPPER_CENTER);
+                        resConfigs = UpdateFilesList();
+
+                    }
+                }
 
                 if (resConfigs.Length == 0)
                     GUI.enabled = false;
@@ -351,7 +387,6 @@ namespace AnyRes
             GameSettings.UI_SCALE = sVal;
             GameSettings.FULLSCREEN = fullscreen;
             Log.Info("SetScreenRes.SetResolution, xVal: " + xVal + ", yVal: " + yVal + ", fullscreen: " + fullscreen);
-
             Screen.SetResolution(xVal, yVal, fullscreen);
             GameSettings.SaveSettings();
             GameSettings.ApplySettings();
@@ -359,14 +394,6 @@ namespace AnyRes
             if (saveConfig)
             {
                 SaveDataConfig(xVal, yVal, sVal, fullscreen);
-#if false
-                SaveConfig(LASTSETRES, xVal.ToString(), yVal.ToString(), fullscreen);
-                var files = UpdateFilesList(true);
-                if (files.Length == 1)
-                {
-                    SetInitialRes.LastSetRes = ConfigNode.Load(files[0]);
-                }
-#endif
             }
         }
 
