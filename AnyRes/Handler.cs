@@ -31,9 +31,7 @@ namespace AnyRes
                     LastSetRes = files[0].node;
                 }
             }
-
-            if (initial & LastSetRes != null)
-
+            if (initial && LastSetRes != null)
             {
                 AnyRes.SetScreenRes(LastSetRes, false);
             }
