@@ -185,12 +185,16 @@ namespace AnyRes
                     yString = GUILayout.TextField(yString);
                     yString = Regex.Replace(yString, @"[^0-9]", "");
                 }
-                using (new GUILayout.HorizontalScope())
+                if (HighLogic.CurrentGame.Parameters.CustomParams<AR>().useUIScale)
                 {
-                    GUILayout.Label("UI Scale: ");
-                    sString = GUILayout.TextField(sString);
-                    sString = Regex.Replace(sString, @"[^0-9\.]", "");
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        GUILayout.Label("UI Scale: ");
+                        sString = GUILayout.TextField(sString);
+                        sString = Regex.Replace(sString, @"[^0-9\.]", "");
+                    }
                 }
+
                 fullScreen = GUILayout.Toggle(fullScreen, "Fullscreen");
 
                 if (GUILayout.Button("Set Resolution/Scale"))

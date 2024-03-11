@@ -29,6 +29,10 @@ namespace AnyRes
             toolTip ="Adds a button to save current window position, will be restored at KSP restart")]
         public bool saveWinPos = true;
 
+        [GameParameters.CustomParameterUI("Modify UI Scale",
+            toolTip = "Adds the option to configure and save the UI Scale alongside the screen resolution")]
+        public bool useUIScale = false;
+
 
 
 
