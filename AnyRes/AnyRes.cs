@@ -125,7 +125,7 @@ namespace AnyRes
                 // The problem is with scaling UP while a scene is loaded or loading
                 // OnDestroy, set UI Scaling to highest anticipated level so the next scene will be the same or lower scale
                 Debug.Log("[AnyRes] OnDestroy - Set UI Scale to highest: " + highestUIscale);
-                GameSettings.UI_SCALE = (float)highestUIscale;
+                GameSettings.UI_SCALE = (float)Math.Max(highestUIscale, 1.0);
                 GameSettings.SaveSettings();
                 GameSettings.ApplySettings();
 
@@ -230,7 +230,6 @@ namespace AnyRes
                         }
                         else
                         {
-
                             ScreenMessages.PostScreenMessage("One or both of your values is too small.  Please enter a valid value.", 1, ScreenMessageStyle.UPPER_CENTER);
                         }
                     }
@@ -269,7 +268,6 @@ namespace AnyRes
                         SaveConfig(newName, newX, newY, newS, newFullscreen);
                         ScreenMessages.PostScreenMessage("Preset saved to current scene: " + HighLogic.LoadedScene, 5, ScreenMessageStyle.UPPER_CENTER);
                         resConfigs = UpdateFilesList();
-
                     }
                 }
 
@@ -371,6 +369,9 @@ namespace AnyRes
             float.TryParse(config.GetValue("scale"), out sVal);
             bool fullscreen;
             bool.TryParse(config.GetValue("fullscreen"), out fullscreen);
+            if (sVal == 0)
+                sVal = 1.0f;
+
             GameSettings.SCREEN_RESOLUTION_HEIGHT = yVal;
             GameSettings.SCREEN_RESOLUTION_WIDTH = xVal;
             GameSettings.UI_SCALE = sVal;
@@ -405,6 +406,8 @@ namespace AnyRes
             config.AddValue("name", newName);
             config.AddValue("x", newX);
             config.AddValue("y", newY);
+            if (newS == "0")
+                newS = "1";
             config.AddValue("scale", newS);
             config.AddValue("fullscreen", newFullscreen.ToString());
             config.Save(KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/" + newName + ".cfg"); 
