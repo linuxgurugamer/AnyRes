@@ -1,11 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 using System.Reflection;
-using System.Text;
-using UnityEngine;
 
 
 namespace AnyRes
@@ -25,8 +19,8 @@ namespace AnyRes
         [GameParameters.CustomParameterUI("Use KSP Skin")]
         public bool useKSPSkin = true;
 
-        [GameParameters.CustomParameterUI("Save Game Window position", 
-            toolTip ="Adds a button to save current window position, will be restored at KSP restart")]
+        [GameParameters.CustomParameterUI("Save Game Window position",
+            toolTip = "Adds a button to save current window position, will be restored at KSP restart")]
         public bool saveWinPos = true;
 
         [GameParameters.CustomParameterUI("Modify UI Scale",
@@ -35,27 +29,12 @@ namespace AnyRes
 
 
 
+        public override void SetDifficultyPreset(GameParameters.Preset preset) { }
 
-        public override void SetDifficultyPreset(GameParameters.Preset preset)
-        {
-        }
+        public override bool Enabled(MemberInfo member, GameParameters parameters) { return true; }
 
-        public override bool Enabled(MemberInfo member, GameParameters parameters)
-        {
+        public override bool Interactible(MemberInfo member, GameParameters parameters) { return true; }
 
-            return true;
-        }
-
-
-        public override bool Interactible(MemberInfo member, GameParameters parameters)
-        {
-
-            return true;
-        }
-
-        public override IList ValidValues(MemberInfo member)
-        {
-            return null;
-        }
+        public override IList ValidValues(MemberInfo member) { return null; }
     }
 }

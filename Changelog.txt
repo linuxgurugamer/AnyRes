@@ -1,9 +1,6 @@
 ChangeLog
 
 2.0.10
-	The following change was inspired by the mod Resolution Keeper, published by Spacedock user Bion
-		Added check to verify that the resolution hadn't changed outside of the game, and reset it if it has
-	Updated URL to get info from Github rather than ksp.spacetux.net
 	Thanks to github user @KerballOne for this:
 		Added Features UI Scale setting and set per SCENE
 		It can now automatically switch resolution and UI scale based on scene. Each setting config now includes
@@ -11,6 +8,9 @@ ChangeLog
 		All it needs is a config file (auto created on first run) with the scene name (e.g. 'EDITOR', 
 			'FLIGHT', etc.).
 		The UI Window updates after each action and allows to save by preset or SCENE. So saving and/or apply new presets is easier.
+	The following change was inspired by the mod Resolution Keeper, published by Spacedock user Bion:
+		Added check to verify that the resolution hadn't changed outside of the game, and reset it if it has
+	Updated URL to get info from Github rather than ksp.spacetux.net
 	Improved kerballone PR by changing UI scale from a number to a slider
 	Added App Scale slider
 

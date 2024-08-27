@@ -20,17 +20,15 @@ namespace AnyRes
     public class AnyRes : MonoBehaviour
     {
 
-        public static Rect anyresWinRect = new Rect(35, 99, 480, 370);
+        public static Rect anyresWinRect = new Rect(35, 99, 480, 360);
         public Rect deleteRect = new Rect((Screen.width - 200) / 2, (Screen.height - 100) / 2, 200, 150);
 
         public string nameString = "";
         public string xString = "1280";
         public string yString = "720";
-        //public string sString = "1.0";
 
         public int x = 1280;
         public int y = 720;
-       // public float s = 1.0f;
 
         const string LASTSETRES = "LastSetRes";
 
@@ -54,7 +52,6 @@ namespace AnyRes
 
             Screen.SetResolution(width, height, fullscreen);
             UIMasterController.Instance.SetScale(uiScale);
-            //UIMasterController.Instance.SetAppScale(GameSettings.UI_SCALE_APPS * uiScale);
             UIMasterController.Instance.SetAppScale(app_Scale * uiScale);
             scale = uiScale;
             appScale = app_Scale;
@@ -112,7 +109,7 @@ namespace AnyRes
             toolbarControl.AddToAllToolbars(OnTrue, OnFalse,
                       ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW |
                       ApplicationLauncher.AppScenes.SPACECENTER |
-                       ApplicationLauncher.AppScenes.SPH |
+                      ApplicationLauncher.AppScenes.SPH |
                       ApplicationLauncher.AppScenes.TRACKSTATION | ApplicationLauncher.AppScenes.VAB,
                       MODID,
                       "AnyResButton",
@@ -123,13 +120,9 @@ namespace AnyRes
             nameString = HighLogic.LoadedScene + "";
             xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
             yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
-            //sString = GameSettings.UI_SCALE.ToString();
             scale = GameSettings.UI_SCALE;
             appScale = GameSettings.UI_SCALE_APPS;
             fullScreen = GameSettings.FULLSCREEN;
-
-            //DontDestroyOnLoad(this);
-
         }
 
         internal const string MODID = "AnyRes_NS";
@@ -240,17 +233,16 @@ namespace AnyRes
 
                     SetResolution(GameSettings.SCREEN_RESOLUTION_WIDTH, GameSettings.SCREEN_RESOLUTION_HEIGHT,
                         scale, appScale, GameSettings.FULLSCREEN);
-
-                    //UIMasterController.Instance.SetScale(scale);
-                    //UIMasterController.Instance.SetAppScale(appScale * scale);
-                    // sString = GUILayout.TextField(sString);
-                    //sString = Regex.Replace(sString, @"[^0-9\.]", "");
-                    //sString = scale.ToString();
-                   // zzz
                 }
 
-                fullScreen = GUILayout.Toggle(fullScreen, "Fullscreen");
-
+                using (new GUILayout.HorizontalScope())
+                {
+                    fullScreen = GUILayout.Toggle(fullScreen, "Fullscreen");
+                    GUILayout.FlexibleSpace();
+                    HighLogic.CurrentGame.Parameters.CustomParams<AR>().useUIScale =
+                        GUILayout.Toggle(HighLogic.CurrentGame.Parameters.CustomParams<AR>().useUIScale, "Enable UI Scale");
+                    GUILayout.FlexibleSpace();
+                }
                 if (GUILayout.Button("Set Resolution/Scale"))
                 {
 
@@ -259,8 +251,6 @@ namespace AnyRes
 
                         x = Convert.ToInt32(xString);
                         y = Convert.ToInt32(yString);
-                        //s = Convert.ToSingle(sString);
-                        //s = scale;
 
                         if (x > 0 && y > 0) // && s > 0)
                         {
@@ -275,12 +265,6 @@ namespace AnyRes
 
                             SetResolution(GameSettings.SCREEN_RESOLUTION_WIDTH, GameSettings.SCREEN_RESOLUTION_HEIGHT,
                                GameSettings.UI_SCALE, GameSettings.UI_SCALE_APPS, GameSettings.FULLSCREEN);
-#if false
-                            Screen.SetResolution(x, y, fullScreen);
-                            float scale = s;
-                            UIMasterController.Instance.SetScale(scale);
-                            UIMasterController.Instance.SetAppScale(GameSettings.UI_SCALE_APPS * scale);
-#endif
 
                             SaveDataConfig(x, y, scale, appScale, fullScreen);
 
@@ -288,7 +272,6 @@ namespace AnyRes
 
                             xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
                             yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
-                            //sString = GameSettings.UI_SCALE.ToString();
                             scale = GameSettings.UI_SCALE;
                             appScale = GameSettings.UI_SCALE_APPS;
                             fullScreen = GameSettings.FULLSCREEN;
@@ -311,7 +294,6 @@ namespace AnyRes
                     var newName = nameString;
                     var newX = xString;
                     var newY = yString;
-                    //var newS = sString;
                     var newFullscreen = fullScreen;
 
                     SaveConfig(newName, newX, newY, scale.ToString(), appScale.ToString(), newFullscreen);
@@ -327,7 +309,6 @@ namespace AnyRes
                         var newName = HighLogic.LoadedScene + "";
                         var newX = xString;
                         var newY = yString;
-                        //var newS = sString;
                         var newFullscreen = fullScreen;
 
                         SaveConfig(newName, newX, newY, scale.ToString(), appScale.ToString(), newFullscreen);
@@ -376,6 +357,7 @@ namespace AnyRes
                 if (GUILayout.Button("Close"))
                 {
                     toolbarControl.SetFalse(true);
+                    GameSettings.SaveSettings();
                 }
             }
 
@@ -407,7 +389,6 @@ namespace AnyRes
                             nameString = GUILayout.TextField(resConfigs[i].node.GetValue("name"));
                             xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
                             yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
-                            //sString = GameSettings.UI_SCALE.ToString();
                             fullScreen = GameSettings.FULLSCREEN;
                             SetResolution(GameSettings.SCREEN_RESOLUTION_WIDTH, GameSettings.SCREEN_RESOLUTION_HEIGHT,
                                 GameSettings.UI_SCALE, GameSettings.UI_SCALE_APPS, GameSettings.FULLSCREEN);
@@ -422,6 +403,7 @@ namespace AnyRes
             if (GUI.Button(new Rect(anyresWinRect.width - 18, 3f, 15f, 15f), new GUIContent("X")))
             {
                 toolbarControl.SetFalse(true);
+                GameSettings.SaveSettings();
             }
 
             GUI.DragWindow();
@@ -452,13 +434,7 @@ namespace AnyRes
             GameSettings.FULLSCREEN = fullscreen;
 
             // Is this really needed, should be applied by the ApplySettings below
-            SetResolution(xVal, yVal, sVal, sAppVal, fullscreen);
-#if false
-            Screen.SetResolution(xVal, yVal, fullscreen);
-            float scale = Convert.ToSingle(sVal);
-            UIMasterController.Instance.SetScale(scale);
-            UIMasterController.Instance.SetAppScale(GameSettings.UI_SCALE_APPS * scale);
-#endif
+            //SetResolution(xVal, yVal, sVal, sAppVal, fullscreen);
             GameSettings.SaveSettings();
             GameSettings.ApplySettings();
 
@@ -572,9 +548,9 @@ namespace AnyRes
                 // Determine the highest UI scaling in the Preset files so that upscaling can be done OnDestroy and only downscaling on loading new scenes
                 float sVal;
                 float.TryParse(ConfigNode.Load(f).GetValue("scale"), out sVal);
-                if (sVal > highestUIscale) 
-                { 
-                    highestUIscale = sVal; 
+                if (sVal > highestUIscale)
+                {
+                    highestUIscale = sVal;
                 }
                 // Debug.Log("[AnyRes] File added: " + f + " with scale " + sVal + " - Highest UI Scale currently: " + highestUIscale); // Debug
             }
