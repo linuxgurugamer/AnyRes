@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 
 namespace AnyRes
 {
-
     public class SetInitialRes : MonoBehaviour
     {
         internal static string dirPath;
@@ -25,7 +24,7 @@ namespace AnyRes
 
                 var files = AnyRes.UpdateFilesList(true);
                 if (files == null)
-                    Log.Error("files is null");
+                    Debug.Log("AnyRes: files is null");
                 if (files.Length == 1)
                 {
                     LastSetRes = files[0].node;

@@ -1,5 +1,19 @@
 ChangeLog
 
+2.0.10
+	The following change was inspired by the mod Resolution Keeper, published by Spacedock user Bion
+		Added check to verify that the resolution hadn't changed outside of the game, and reset it if it has
+	Updated URL to get info from Github rather than ksp.spacetux.net
+	Thanks to github user @KerballOne for this:
+		Added Features UI Scale setting and set per SCENE
+		It can now automatically switch resolution and UI scale based on scene. Each setting config now includes
+			a "scale" attribute in addition to name, height, width and fullscreen.
+		All it needs is a config file (auto created on first run) with the scene name (e.g. 'EDITOR', 
+			'FLIGHT', etc.).
+		The UI Window updates after each action and allows to save by preset or SCENE. So saving and/or apply new presets is easier.
+	Improved kerballone PR by changing UI scale from a number to a slider
+	Added App Scale slider
+
 2.0.9.1
 	Fixed error induced by previous fix, where the screen was being reset upon reentering after changing screen, due to a variable not being set properly.  
 
@@ -30,7 +44,7 @@ ChangeLog
 
 2.0.7
 	Added code to set res to last set resolution at every scene change
-	Added code to set resoltuion when application gains focus, usually after alt-tabbing away and then back
+	Added code to set resolution when application gains focus, usually after alt-tabbing away and then back
 
 2.0.6
 	Fixed log prefix

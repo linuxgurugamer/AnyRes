@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 using ToolbarControl_NS;
 using ClickThroughFix;
-using static Targeting;
+using KSP.UI;
 
 namespace AnyRes
 {
@@ -20,17 +20,17 @@ namespace AnyRes
     public class AnyRes : MonoBehaviour
     {
 
-        public static Rect anyresWinRect = new Rect(35, 99, 420, 370);
+        public static Rect anyresWinRect = new Rect(35, 99, 480, 370);
         public Rect deleteRect = new Rect((Screen.width - 200) / 2, (Screen.height - 100) / 2, 200, 150);
 
         public string nameString = "";
         public string xString = "1280";
         public string yString = "720";
-        public string sString = "1.0";
+        //public string sString = "1.0";
 
         public int x = 1280;
         public int y = 720;
-        public float s = 1.0f;
+       // public float s = 1.0f;
 
         const string LASTSETRES = "LastSetRes";
 
@@ -39,6 +39,27 @@ namespace AnyRes
         public static double highestUIscale = 1 + .0f;
 
         ToolbarControl toolbarControl;
+
+        static float scale;
+        static float appScale;
+
+        static void SetResolution(int width, int height, float uiScale, float app_Scale, bool fullscreen)
+        {
+            GameSettings.SCREEN_RESOLUTION_HEIGHT = height;
+            GameSettings.SCREEN_RESOLUTION_WIDTH = width;
+            GameSettings.UI_SCALE = scale;
+            GameSettings.UI_SCALE_APPS = app_Scale;
+            GameSettings.FULLSCREEN = fullscreen;
+
+
+            Screen.SetResolution(width, height, fullscreen);
+            UIMasterController.Instance.SetScale(uiScale);
+            //UIMasterController.Instance.SetAppScale(GameSettings.UI_SCALE_APPS * uiScale);
+            UIMasterController.Instance.SetAppScale(app_Scale * uiScale);
+            scale = uiScale;
+            appScale = app_Scale;
+        }
+
 
         internal class ResConfig
         {
@@ -49,7 +70,7 @@ namespace AnyRes
 
         internal static ResConfig[] resConfigs;
 
-        string file = "";
+        //string file = "";
         string deleteFile = "";
         string deleteFileName = "";
         Vector2 scrollViewPos;
@@ -59,28 +80,34 @@ namespace AnyRes
 
         void Start()
         {
-
+#if DEBUG
             Log.Info("SceneLoaded, scene: " + HighLogic.LoadedScene);
-            Debug.Log("[AnyRes] OnStart() Scene Loaded: " + HighLogic.LoadedScene);
-
+#endif
             // if scene config file does not exist, create it based on current values
             string sceneConfigFile = SetInitialRes.dirPath + HighLogic.LoadedScene + ".cfg";
             if (!File.Exists(sceneConfigFile))
             {
-                Debug.Log("[AnyRes] Creating " + HighLogic.LoadedScene + " config file");
+#if DEBUG
+                Log.Info("[AnyRes] Creating " + HighLogic.LoadedScene + " config file");
+#endif
                 xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
                 yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
-                sString = GameSettings.UI_SCALE.ToString();
+                //sString = GameSettings.UI_SCALE.ToString();
+                scale = GameSettings.UI_SCALE;
+                appScale = GameSettings.UI_SCALE_APPS;
                 fullScreen = GameSettings.FULLSCREEN;
-                SaveConfig(HighLogic.LoadedScene + "", xString, yString, sString, fullScreen);
+                SaveConfig(HighLogic.LoadedScene + "", xString, yString, scale.ToString(), appScale.ToString(), fullScreen);
             }
-
-            Debug.Log("[AnyRes] Setting SCENE config for " + HighLogic.LoadedScene);
+#if DEBUG
+            Log.Info("[AnyRes] Setting SCENE config for " + HighLogic.LoadedScene);
+#endif
             SetScreenRes(ConfigNode.Load(sceneConfigFile), true);
 
             resConfigs = UpdateFilesList();
 
+#if DEBUG
             Debug.Log("[AnyRes] Creating Toolbar for scene " + HighLogic.LoadedScene);
+#endif
             toolbarControl = gameObject.AddComponent<ToolbarControl>();
             toolbarControl.AddToAllToolbars(OnTrue, OnFalse,
                       ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW |
@@ -96,8 +123,12 @@ namespace AnyRes
             nameString = HighLogic.LoadedScene + "";
             xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
             yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
-            sString = GameSettings.UI_SCALE.ToString();
+            //sString = GameSettings.UI_SCALE.ToString();
+            scale = GameSettings.UI_SCALE;
+            appScale = GameSettings.UI_SCALE_APPS;
             fullScreen = GameSettings.FULLSCREEN;
+
+            //DontDestroyOnLoad(this);
 
         }
 
@@ -124,7 +155,9 @@ namespace AnyRes
                 // Fixes issue with changing UI Scaling while loading existing scene
                 // The problem is with scaling UP while a scene is loaded or loading
                 // OnDestroy, set UI Scaling to highest anticipated level so the next scene will be the same or lower scale
+#if DEBUG
                 Debug.Log("[AnyRes] OnDestroy - Set UI Scale to highest: " + highestUIscale);
+#endif
                 GameSettings.UI_SCALE = (float)Math.Max(highestUIscale, 1.0);
                 GameSettings.SaveSettings();
                 GameSettings.ApplySettings();
@@ -133,7 +166,6 @@ namespace AnyRes
                 Destroy(toolbarControl);
             }
         }
-
 
         void OnGUI()
         {
@@ -159,6 +191,12 @@ namespace AnyRes
             }
             if (confirmDeleteEnabled)
                 deleteRect = ClickThruBlocker.GUIWindow(09276, deleteRect, ConfirmDelete, "Confirm");
+            if (Screen.width != GameSettings.SCREEN_RESOLUTION_WIDTH || Screen.height != GameSettings.SCREEN_RESOLUTION_HEIGHT)
+            {
+                SetResolution(GameSettings.SCREEN_RESOLUTION_WIDTH, GameSettings.SCREEN_RESOLUTION_HEIGHT,
+                   GameSettings.UI_SCALE, GameSettings.UI_SCALE_APPS, GameSettings.FULLSCREEN);
+            }
+
         }
 
         void GUIActive(int windowID)
@@ -190,9 +228,25 @@ namespace AnyRes
                     using (new GUILayout.HorizontalScope())
                     {
                         GUILayout.Label("UI Scale: ");
-                        sString = GUILayout.TextField(sString);
-                        sString = Regex.Replace(sString, @"[^0-9\.]", "");
+                        scale = GUILayout.HorizontalSlider(scale, .8f, 2.0f, GUILayout.MinWidth(200), GUILayout.ExpandWidth(true));
+                        GUILayout.Label(scale.ToString("F1"));
                     }
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        GUILayout.Label("App Scale: ");
+                        appScale = GUILayout.HorizontalSlider(appScale, .5f, 2.0f, GUILayout.MinWidth(200), GUILayout.ExpandWidth(true));
+                        GUILayout.Label(appScale.ToString("F2"));
+                    }
+
+                    SetResolution(GameSettings.SCREEN_RESOLUTION_WIDTH, GameSettings.SCREEN_RESOLUTION_HEIGHT,
+                        scale, appScale, GameSettings.FULLSCREEN);
+
+                    //UIMasterController.Instance.SetScale(scale);
+                    //UIMasterController.Instance.SetAppScale(appScale * scale);
+                    // sString = GUILayout.TextField(sString);
+                    //sString = Regex.Replace(sString, @"[^0-9\.]", "");
+                    //sString = scale.ToString();
+                   // zzz
                 }
 
                 fullScreen = GUILayout.Toggle(fullScreen, "Fullscreen");
@@ -200,32 +254,43 @@ namespace AnyRes
                 if (GUILayout.Button("Set Resolution/Scale"))
                 {
 
-                    if (xString != null && yString != null && sString != null)
+                    if (xString != null && yString != null) // && sString != null)
                     {
 
                         x = Convert.ToInt32(xString);
                         y = Convert.ToInt32(yString);
-                        s = Convert.ToSingle(sString);
+                        //s = Convert.ToSingle(sString);
+                        //s = scale;
 
-                        if (x > 0 && y > 0 && s > 0)
+                        if (x > 0 && y > 0) // && s > 0)
                         {
 
                             GameSettings.SCREEN_RESOLUTION_HEIGHT = y;
                             GameSettings.SCREEN_RESOLUTION_WIDTH = x;
-                            GameSettings.UI_SCALE = s;
+                            GameSettings.UI_SCALE = scale;
+                            GameSettings.UI_SCALE_APPS = appScale;
                             GameSettings.FULLSCREEN = fullScreen;
                             GameSettings.SaveSettings();
                             GameSettings.ApplySettings();
-                            Log.Info("GUIActive.SetResolution, x: " + x + ", y: " + y + ", s: " + s + ", fullScreen: " + fullScreen);
-                            Screen.SetResolution(x, y, fullScreen);
 
-                            SaveDataConfig(x, y, s, fullScreen);
+                            SetResolution(GameSettings.SCREEN_RESOLUTION_WIDTH, GameSettings.SCREEN_RESOLUTION_HEIGHT,
+                               GameSettings.UI_SCALE, GameSettings.UI_SCALE_APPS, GameSettings.FULLSCREEN);
+#if false
+                            Screen.SetResolution(x, y, fullScreen);
+                            float scale = s;
+                            UIMasterController.Instance.SetScale(scale);
+                            UIMasterController.Instance.SetAppScale(GameSettings.UI_SCALE_APPS * scale);
+#endif
+
+                            SaveDataConfig(x, y, scale, appScale, fullScreen);
 
                             Debug.Log("[AnyRes] Set screen resolution");
 
                             xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
                             yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
-                            sString = GameSettings.UI_SCALE.ToString();
+                            //sString = GameSettings.UI_SCALE.ToString();
+                            scale = GameSettings.UI_SCALE;
+                            appScale = GameSettings.UI_SCALE_APPS;
                             fullScreen = GameSettings.FULLSCREEN;
                         }
                         else
@@ -246,10 +311,10 @@ namespace AnyRes
                     var newName = nameString;
                     var newX = xString;
                     var newY = yString;
-                    var newS = sString;
+                    //var newS = sString;
                     var newFullscreen = fullScreen;
 
-                    SaveConfig(newName, newX, newY, newS, newFullscreen);
+                    SaveConfig(newName, newX, newY, scale.ToString(), appScale.ToString(), newFullscreen);
                     ScreenMessages.PostScreenMessage("Preset saved.  You can change the preset later by using the same name in this editor.", 5, ScreenMessageStyle.UPPER_CENTER);
                     resConfigs = UpdateFilesList();
 
@@ -262,10 +327,10 @@ namespace AnyRes
                         var newName = HighLogic.LoadedScene + "";
                         var newX = xString;
                         var newY = yString;
-                        var newS = sString;
+                        //var newS = sString;
                         var newFullscreen = fullScreen;
 
-                        SaveConfig(newName, newX, newY, newS, newFullscreen);
+                        SaveConfig(newName, newX, newY, scale.ToString(), appScale.ToString(), newFullscreen);
                         ScreenMessages.PostScreenMessage("Preset saved to current scene: " + HighLogic.LoadedScene, 5, ScreenMessageStyle.UPPER_CENTER);
                         resConfigs = UpdateFilesList();
                     }
@@ -336,14 +401,17 @@ namespace AnyRes
                             SetScreenRes(resConfigs[i].node);
                             SetInitialRes.LastSetRes = resConfigs[i].node;
                             GameSettings.SaveSettings();
-
+#if DEBUG
                             Debug.Log("[AnyRes] Set screen resolution from preset");
-
+#endif
                             nameString = GUILayout.TextField(resConfigs[i].node.GetValue("name"));
                             xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
                             yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
-                            sString = GameSettings.UI_SCALE.ToString();
+                            //sString = GameSettings.UI_SCALE.ToString();
                             fullScreen = GameSettings.FULLSCREEN;
+                            SetResolution(GameSettings.SCREEN_RESOLUTION_WIDTH, GameSettings.SCREEN_RESOLUTION_HEIGHT,
+                                GameSettings.UI_SCALE, GameSettings.UI_SCALE_APPS, GameSettings.FULLSCREEN);
+
                         }
                     }
                 }
@@ -372,25 +440,38 @@ namespace AnyRes
             if (sVal == 0)
                 sVal = 1.0f;
 
+            float sAppVal;
+            float.TryParse(config.GetValue("appScale"), out sAppVal);
+            if (sAppVal == 0)
+                sAppVal = 1.0f;
+
             GameSettings.SCREEN_RESOLUTION_HEIGHT = yVal;
             GameSettings.SCREEN_RESOLUTION_WIDTH = xVal;
             GameSettings.UI_SCALE = sVal;
+            GameSettings.UI_SCALE_APPS = sAppVal;
             GameSettings.FULLSCREEN = fullscreen;
-            Log.Info("SetScreenRes.SetResolution, xVal: " + xVal + ", yVal: " + yVal + ", fullscreen: " + fullscreen);
+
+            // Is this really needed, should be applied by the ApplySettings below
+            SetResolution(xVal, yVal, sVal, sAppVal, fullscreen);
+#if false
             Screen.SetResolution(xVal, yVal, fullscreen);
+            float scale = Convert.ToSingle(sVal);
+            UIMasterController.Instance.SetScale(scale);
+            UIMasterController.Instance.SetAppScale(GameSettings.UI_SCALE_APPS * scale);
+#endif
             GameSettings.SaveSettings();
             GameSettings.ApplySettings();
 
             if (saveConfig)
             {
-                SaveDataConfig(xVal, yVal, sVal, fullscreen);
+                SaveDataConfig(xVal, yVal, sVal, sAppVal, fullscreen);
 
             }
         }
 
-        static void SaveDataConfig(int xVal, int yVal, float sVal, bool fullscreen)
+        static void SaveDataConfig(int xVal, int yVal, float sVal, float appScale, bool fullscreen)
         {
-            SaveConfig(LASTSETRES, xVal.ToString(), yVal.ToString(), sVal.ToString(), fullscreen);
+            SaveConfig(LASTSETRES, xVal.ToString(), yVal.ToString(), sVal.ToString(), appScale.ToString(), fullscreen);
             var resConfigs = UpdateFilesList(true);
             if (resConfigs.Length == 1)
             {
@@ -400,7 +481,7 @@ namespace AnyRes
 
         }
 
-        static void SaveConfig(string newName, string newX, string newY, string newS, bool newFullscreen)
+        static void SaveConfig(string newName, string newX, string newY, string newS, string newAppScale, bool newFullscreen)
         {
             ConfigNode config = new ConfigNode(newName);
             config.AddValue("name", newName);
@@ -409,8 +490,9 @@ namespace AnyRes
             if (newS == "0")
                 newS = "1";
             config.AddValue("scale", newS);
+            config.AddValue("appScale", newAppScale);
             config.AddValue("fullscreen", newFullscreen.ToString());
-            config.Save(KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/" + newName + ".cfg"); 
+            config.Save(KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/" + newName + ".cfg");
 
         }
 
@@ -468,7 +550,7 @@ namespace AnyRes
         {
             var files = Directory.GetFiles(SetInitialRes.dirPath, "*.cfg");
             List<ResConfig> flist = new List<ResConfig>();
-            
+
 
             foreach (var f in files)
             {
@@ -490,7 +572,10 @@ namespace AnyRes
                 // Determine the highest UI scaling in the Preset files so that upscaling can be done OnDestroy and only downscaling on loading new scenes
                 float sVal;
                 float.TryParse(ConfigNode.Load(f).GetValue("scale"), out sVal);
-                if (sVal > highestUIscale) { highestUIscale = sVal; }
+                if (sVal > highestUIscale) 
+                { 
+                    highestUIscale = sVal; 
+                }
                 // Debug.Log("[AnyRes] File added: " + f + " with scale " + sVal + " - Highest UI Scale currently: " + highestUIscale); // Debug
             }
             return flist.ToArray();
