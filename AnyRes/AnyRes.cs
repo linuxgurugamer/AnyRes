@@ -357,7 +357,6 @@ namespace AnyRes
                 if (GUILayout.Button("Close"))
                 {
                     toolbarControl.SetFalse(true);
-                    GameSettings.SaveSettings();
                 }
             }
 
@@ -403,7 +402,6 @@ namespace AnyRes
             if (GUI.Button(new Rect(anyresWinRect.width - 18, 3f, 15f, 15f), new GUIContent("X")))
             {
                 toolbarControl.SetFalse(true);
-                GameSettings.SaveSettings();
             }
 
             GUI.DragWindow();
