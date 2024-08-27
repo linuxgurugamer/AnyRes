@@ -60,7 +60,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(KSPDIR)\GameData\000_ClickThroughBlocker\Plugins\ClickThroughBlocker.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
     <Reference Include="ToolbarControl, Version=0.1.4.6, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(KSPDIR)\GameData\001_ToolbarControl\Plugins\ToolbarControl.dll</HintPath>
