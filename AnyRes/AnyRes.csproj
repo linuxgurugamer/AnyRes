@@ -76,11 +76,6 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
     <Compile Include="Presets.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System">
-      <HintPath>$(KSPDIR)\KSP_x64_Data\Managed\System.dll</HintPath>
-    </Reference>
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"$(DevEnvDir)\texttransform.exe" "$(ProjectDir)AssemblyVersion.tt"
