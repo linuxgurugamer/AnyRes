@@ -1,5 +1,4 @@
-﻿#if DEBUG
-using System;
+﻿using System;
 using System.Collections;
 using System.Diagnostics;
 
@@ -104,4 +103,3 @@ namespace AnyRes
 
     }
 }
-#endif

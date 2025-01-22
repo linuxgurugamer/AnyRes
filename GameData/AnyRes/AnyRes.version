@@ -1,6 +1,6 @@
 {
   "NAME": "AnyRes",
-  "URL": "https://raw.githubusercontent.com/linuxgurugamer/AnyRes/master/AnyRes.version",
+  "URL": "https://raw.githubusercontent.com/linuxgurugamer/AnyRes/refs/heads/master/AnyRes.version",
   "DOWNLOAD": "https://github.com/linuxgurugamer/AnyRes/releases",
   "GITHUB": {
     "USERNAME": "linuxgurugamer",
@@ -9,7 +9,7 @@
   "VERSION": {
     "MAJOR": 2,
     "MINOR": 0,
-    "PATCH": 10,
+    "PATCH": 11,
     "BUILD": 0
   },
   "KSP_VERSION": {
