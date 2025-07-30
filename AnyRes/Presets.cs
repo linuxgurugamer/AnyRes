@@ -1,4 +1,5 @@
-﻿#if false
+#if false
+using KSP.Localization;
 using System;
 using System.Text.RegularExpressions;
 using System.IO;
@@ -58,7 +59,7 @@ namespace AnyRes.Util
                 if ( windowRect.height + windowRect.height > Screen.height)
                     AnyRes.anyresWinRect.y = Screen.height - Math.Max(AnyRes.anyresWinRect.height, windowRect.height);
 
-                windowRect = GUI.Window (09272, windowRect, onWindow, "Presets");
+                windowRect = GUI.Window (09272, windowRect, onWindow, Localizer.Format("#LOC_AnyRes_Presets"));
 
 			}
 
@@ -69,7 +70,7 @@ namespace AnyRes.Util
                 if (newRect.y + newRect.height > Screen.height)
                     AnyRes.anyresWinRect.y = Screen.height - Math.Max(AnyRes.anyresWinRect.height, newRect.height);
 
-                newRect = GUI.Window (09273, newRect, onNew, "New Preset");
+                newRect = GUI.Window (09273, newRect, onNew, Localizer.Format("#LOC_AnyRes_New_Preset"));
 
 			}
 
@@ -81,33 +82,33 @@ namespace AnyRes.Util
                     AnyRes.anyresWinRect.y = Screen.height - Math.Max(AnyRes.anyresWinRect.height, loadRect.height);
 
                 if (loadEnabled)
-                    loadRect = GUI.Window(09274, loadRect, onLoad, "Load Preset");
+                    loadRect = GUI.Window(09274, loadRect, onLoad, Localizer.Format("#LOC_AnyRes_Load_Preset"));
                 else
-                    loadRect = GUI.Window(09275, loadRect, onDelete, "Delete Preset");
+                    loadRect = GUI.Window(09275, loadRect, onDelete, Localizer.Format("#LOC_AnyRes_Delete_Preset"));
 
             }
             if (confirmDeleteEnabled)
-                deleteRect = GUI.Window(09276, deleteRect, ConfirmDelete, "Confirm");
+                deleteRect = GUI.Window(09276, deleteRect, ConfirmDelete, Localizer.Format("#LOC_AnyRes_Confirm"));
 
         }
 
 		void onWindow (int windowID) {
 
 			GUILayout.BeginVertical ();
-			if (GUILayout.Button ("New")) {
+			if (GUILayout.Button (Localizer.Format("#LOC_AnyRes_New"))) {
 
 				newEnabled = !newEnabled;
                 loadEnabled = false;
 
 
             }
-			if (GUILayout.Button ("Load")) {
+			if (GUILayout.Button (Localizer.Format("#LOC_AnyRes_Load"))) {
 
 				loadEnabled = !loadEnabled;
 				files = Directory.GetFiles(KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/presets/", "*.cfg");
                 newEnabled = false;
 			}
-            if (GUILayout.Button("Delete"))
+            if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Delete")))
             {
 
                 deleteEnabled = !deleteEnabled;
@@ -129,8 +130,8 @@ namespace AnyRes.Util
 			newX = Regex.Replace (newX, @"[^0-9]", "");
 			newY = GUILayout.TextField (newY);
 			newY = Regex.Replace (newY, @"[^0-9]", "");
-			newFullscreen = GUILayout.Toggle (newFullscreen, "Fullscreen");
-			if (GUILayout.Button ("Save")) {
+			newFullscreen = GUILayout.Toggle (newFullscreen, Localizer.Format("#LOC_AnyRes_Fullscreen"));
+			if (GUILayout.Button (Localizer.Format("#LOC_AnyRes_Save"))) {
 
 				ConfigNode config = new ConfigNode (newName);
 				config.AddValue ("name", newName);
@@ -139,14 +140,14 @@ namespace AnyRes.Util
 				config.AddValue ("fullscreen", newFullscreen.ToString());
 				config.Save (KSPUtil.ApplicationRootPath.Replace ("\\", "/") + "GameData/AnyRes/presets/" + newName + ".cfg");
 
-				ScreenMessages.PostScreenMessage ("Preset saved.  You can change the preset later by using the same name in this editor.", 5, ScreenMessageStyle.UPPER_CENTER);
+				ScreenMessages.PostScreenMessage (Localizer.Format("#LOC_AnyRes_Preset_saved_You_can_chan"), 5, ScreenMessageStyle.UPPER_CENTER);
 
 			}
-			if (GUILayout.Button ("Cancel")) {
+			if (GUILayout.Button (Localizer.Format("#LOC_AnyRes_Cancel"))) {
 				
-				newName = "Name";
-				newX = "1280";
-				newY = "720";
+				newName = Localizer.Format("#LOC_AnyRes_Name_DUP1");
+				newX = "1280"; // NO_LOCALIZATION
+				newY = "720"; // NO_LOCALIZATION
 				newFullscreen = false;
 				newEnabled = false;
 
@@ -161,17 +162,17 @@ namespace AnyRes.Util
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label("Confirm delete");
+            GUILayout.Label(Localizer.Format("#LOC_AnyRes_Confirm_delete"));
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Cancel"))
+            if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Cancel")))
             {
                 deleteEnabled = false;
                 confirmDeleteEnabled = false;
             }
-            if (GUILayout.Button("Yes"))
+            if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Yes")))
             {
 
                 deleteEnabled = false;

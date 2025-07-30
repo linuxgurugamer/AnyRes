@@ -1,5 +1,10 @@
 ChangeLog
 
+2.0.12.1
+	Thanks to github user @clayell for this:
+		Fix resolution names
+	Localized the mod
+
 2.0.12 
 	Updated presets to have consistant names re. windowed and Fullscreen
 

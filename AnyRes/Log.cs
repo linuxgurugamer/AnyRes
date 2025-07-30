@@ -18,7 +18,7 @@ namespace AnyRes
 
         public static LEVEL level = LEVEL.INFO;
 
-        private static readonly String PREFIX = "AnyRes" + ": ";
+        private static readonly String PREFIX = "AnyRes" + ": "; // NO_LOCALIZATION
 
         public static LEVEL GetLevel()
         {

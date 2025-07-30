@@ -1,4 +1,5 @@
-﻿using System;
+using KSP.Localization;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,6 +23,7 @@ namespace AnyRes
         public static Rect anyresWinRect = new Rect(35, 99, 400, 315);
         public Rect deleteRect = new Rect((Screen.width - 200) / 2, (Screen.height - 100) / 2, 200, 100);
 
+        #region NO_LOCALIZATION
         public string nameString = "";
         public string xString = "1280";
         public string yString = "720";
@@ -135,17 +137,18 @@ namespace AnyRes
 
                 anyresWinRect.x = Math.Max(anyresWinRect.x, 0);
                 anyresWinRect.y = Math.Max(anyresWinRect.y, 0);
-
-                anyresWinRect = ClickThruBlocker.GUIWindow(09271, anyresWinRect, GUIActive, "AnyRes");
+                #endregion
+                anyresWinRect = ClickThruBlocker.GUIWindow(09271, anyresWinRect, GUIActive, Localizer.Format("#LOC_AnyRes_AnyRes"));
 
             }
             if (confirmDeleteEnabled)
-                deleteRect = ClickThruBlocker.GUIWindow(09276, deleteRect, ConfirmDelete, "Confirm");
+                deleteRect = ClickThruBlocker.GUIWindow(09276, deleteRect, ConfirmDelete, Localizer.Format("#LOC_AnyRes_Confirm"));
 
             if (Screen.width != GameSettings.SCREEN_RESOLUTION_WIDTH || Screen.height != GameSettings.SCREEN_RESOLUTION_HEIGHT)
             {
                 Log.Info("Resetting Video Resolution to: " + GameSettings.SCREEN_RESOLUTION_WIDTH + " x " + GameSettings.SCREEN_RESOLUTION_HEIGHT +
-                   (GameSettings.FULLSCREEN ? ", Fullscreen" : ", Windowed"));
+                  ", " + // NO_LOCALIZATION
+                    (GameSettings.FULLSCREEN ? Localizer.Format("#LOC_AnyRes_Fullscreen") : Localizer.Format("#LOC_AnyRes_Windowed")));
                 Screen.SetResolution(GameSettings.SCREEN_RESOLUTION_WIDTH, GameSettings.SCREEN_RESOLUTION_HEIGHT, GameSettings.FULLSCREEN);
             }
         }
@@ -158,25 +161,25 @@ namespace AnyRes
             {
                 using (new GUILayout.HorizontalScope())
                 {
-                    GUILayout.Label("Name: ");
+                    GUILayout.Label(Localizer.Format("#LOC_AnyRes_Name"));
                     nameString = GUILayout.TextField(nameString);
                 }
 
                 using (new GUILayout.HorizontalScope())
                 {
-                    GUILayout.Label("Width: ");
+                    GUILayout.Label(Localizer.Format("#LOC_AnyRes_Width"));
                     xString = GUILayout.TextField(xString);
                     xString = Regex.Replace(xString, @"[^0-9]", "");
                 }
                 using (new GUILayout.HorizontalScope())
                 {
-                    GUILayout.Label("Height: ");
+                    GUILayout.Label(Localizer.Format("#LOC_AnyRes_Height"));
                     yString = GUILayout.TextField(yString);
                     yString = Regex.Replace(yString, @"[^0-9]", "");
                 }
-                fullScreen = GUILayout.Toggle(fullScreen, "Fullscreen");
+                fullScreen = GUILayout.Toggle(fullScreen, Localizer.Format("#LOC_AnyRes_Fullscreen"));
                 //			reloadScene = GUILayout.Toggle (reloadScene, "Reload scene");
-                if (GUILayout.Button("Set Screen Resolution"))
+                if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Set_Screen_Resolution")))
                 {
 
                     if (xString != null && yString != null)
@@ -203,18 +206,18 @@ namespace AnyRes
                         else
                         {
 
-                            ScreenMessages.PostScreenMessage("One or both of your values is too small.  Please enter a valid value.", 1, ScreenMessageStyle.UPPER_CENTER);
+                            ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_AnyRes_One_or_both_of_your_value"), 1, ScreenMessageStyle.UPPER_CENTER);
                         }
                     }
                     else
                     {
-                        ScreenMessages.PostScreenMessage("The values you have set are invalid.  Please set a valid value.", 1, ScreenMessageStyle.UPPER_CENTER);
+                        ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_AnyRes_The_values_you_have_set_a"), 1, ScreenMessageStyle.UPPER_CENTER);
                     }
 
                 }
                 if (nameString == "")
                     GUI.enabled = false;
-                if (GUILayout.Button("Save"))
+                if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Save")))
                 {
                     var newName = nameString;
                     var newX = xString;
@@ -222,7 +225,7 @@ namespace AnyRes
                     var newFullscreen = fullScreen;
 
                     SaveConfig(newName, newX, newY, newFullscreen);
-                    ScreenMessages.PostScreenMessage("Preset saved.  You can change the preset later by using the same name in this editor.", 5, ScreenMessageStyle.UPPER_CENTER);
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_AnyRes_Preset_saved_You_can_chan"), 5, ScreenMessageStyle.UPPER_CENTER);
                     resConfigs = UpdateFilesList();
 
                 }
@@ -234,7 +237,7 @@ namespace AnyRes
                     GUI.enabled = true;
                 if (deleteEnabled)
                 {
-                    if (GUILayout.Button("Disable Delete"))
+                    if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Disable_Delete")))
                     {
                         deleteEnabled = false;
                     }
@@ -242,7 +245,7 @@ namespace AnyRes
                 }
                 else
                 {
-                    if (GUILayout.Button("Enable Delete"))
+                    if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Enable_Delete")))
                     {
                         deleteEnabled = true;
                     }
@@ -252,12 +255,12 @@ namespace AnyRes
                 {
                     using (new GUILayout.HorizontalScope())
                     {
-                        if (GUILayout.Button("Save Win Pos"))
+                        if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Save_Win_Pos")))
                         {
                             SaveWinPos();
                         }
 
-                        if (GUILayout.Button("Clear Win Pos"))
+                        if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Clear_Win_Pos")))
                         {
                             SaveWinPos(clear: true);
                         }
@@ -265,7 +268,7 @@ namespace AnyRes
                 }
 
 
-                if (GUILayout.Button("Close"))
+                if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Close")))
                 {
                     toolbarControl.SetFalse(true);
                 }
@@ -349,6 +352,7 @@ namespace AnyRes
 
         }
 
+        #region NO_LOCALIZATION
         static void SaveConfig(string newName, string newX, string newY, bool newFullscreen)
         {
             ConfigNode config = new ConfigNode(newName);
@@ -383,23 +387,23 @@ namespace AnyRes
                 if (File.Exists(WinPosFileName(WinPosName)))
                 File.Delete(WinPosFileName(WinPosName));
         }
-
+        #endregion
 
         void ConfirmDelete(int id)
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label("Confirm delete of " + deleteFileName);
+            GUILayout.Label(Localizer.Format("#LOC_AnyRes_Confirm_delete_of") + deleteFileName);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Cancel"))
+            if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Cancel")))
             {
                 deleteEnabled = false;
                 confirmDeleteEnabled = false;
             }
-            if (GUILayout.Button("Yes"))
+            if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Yes")))
             {
                 //deleteEnabled = false;
                 confirmDeleteEnabled = false;
@@ -409,6 +413,7 @@ namespace AnyRes
             GUILayout.EndHorizontal();
         }
 
+        #region NO_LOCALIZATION
         internal static ResConfig[] UpdateFilesList(bool LastRes = false)
         {
             var files = Directory.GetFiles(SetInitialRes.dirPath, "*.cfg");
@@ -436,7 +441,7 @@ namespace AnyRes
 
             return flist.ToArray();
         }
-
+        #endregion
 
         //////////////////////////////////////////////////////////////////////
         ///

@@ -1,4 +1,5 @@
-﻿using System;
+using KSP.Localization;
+using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,10 +16,10 @@ namespace AnyRes
 
     public class AR : GameParameters.CustomParameterNode
     {
-        public override string Title { get { return "AnyRes"; } }
+        public override string Title { get { return Localizer.Format("#LOC_AnyRes_AnyRes"); } }
         public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.ANY; } }
-        public override string Section { get { return "AnyRes"; } }
-        public override string DisplaySection { get { return "AnyRes"; } }
+        public override string Section { get { return Localizer.Format("#LOC_AnyRes_AnyRes"); } }
+        public override string DisplaySection { get { return Localizer.Format("#LOC_AnyRes_AnyRes"); } }
         public override int SectionOrder { get { return 3; } }
         public override bool HasPresets { get { return false; } }
 
@@ -26,7 +27,7 @@ namespace AnyRes
         public bool useKSPSkin = true;
 
         [GameParameters.CustomParameterUI("Save Game Window position", 
-            toolTip ="Adds a button to save current window position, will be restored at KSP restart")]
+            toolTip ="#LOC_AnyRes_Adds_a_button_to_save_cur")]
         public bool saveWinPos = true;
 
 

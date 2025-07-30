@@ -15,6 +15,8 @@ namespace AnyRes
         static bool initialResSet = false;
         internal static ConfigNode LastSetRes = null;
 
+        #region NO_LOCALIZATION
+
         internal void DoStart(bool initial)
         {
             if (!initialResSet)
@@ -51,7 +53,7 @@ namespace AnyRes
                 StartCoroutine(SetWindowPosition(Left, Top));
             }
         }
-
+        #endregion
 
         //////////////////////////////////////////////////////////////////////
         ///
