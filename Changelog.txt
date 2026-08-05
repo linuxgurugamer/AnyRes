@@ -1,5 +1,10 @@
 ChangeLog
 
+2.0.13
+	Fixed another issue where the resolution was being reset to the default when changing focus to another window (non-KSP), due to an incorrect array reference
+	Added new slider to change the UI scale.
+	Adjusted width of listbox with all different resolution to avoid cutting off the end of the resolution name
+
 2.0.12.1
 	Thanks to github user @clayell for this:
 		Fix resolution names

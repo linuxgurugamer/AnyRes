@@ -1,4 +1,6 @@
 using KSP.Localization;
+using KSP.UI.Screens;
+using KSP.UI.Screens.Settings.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,7 +22,7 @@ namespace AnyRes
     public class AnyRes : MonoBehaviour
     {
 
-        public static Rect anyresWinRect = new Rect(35, 99, 400, 315);
+        public static Rect anyresWinRect = new Rect(35, 99, 420, 380);
         public Rect deleteRect = new Rect((Screen.width - 200) / 2, (Screen.height - 100) / 2, 200, 100);
 
         #region NO_LOCALIZATION
@@ -72,11 +74,13 @@ namespace AnyRes
 
             xString = GameSettings.SCREEN_RESOLUTION_WIDTH.ToString();
             yString = GameSettings.SCREEN_RESOLUTION_HEIGHT.ToString();
+            x = GameSettings.SCREEN_RESOLUTION_WIDTH;
+            y = GameSettings.SCREEN_RESOLUTION_HEIGHT;
+
             fullScreen = GameSettings.FULLSCREEN;
 
             resConfigs = UpdateFilesList();
 
-            Log.Info("SceneLoaded, scene: " + HighLogic.LoadedScene);
             if (toolbarControl == null)
             {
                 toolbarControl = gameObject.AddComponent<ToolbarControl>();
@@ -95,10 +99,11 @@ namespace AnyRes
 
         internal const string MODID = "AnyRes_NS";
         internal const string MODNAME = "AnyRes";
-
+        internal float uiScale = 1.0f;
         void OnTrue()
         {
             windowEnabled = true;
+            uiScale = GameSettings.UI_SCALE;
         }
         void OnFalse()
         {
@@ -153,6 +158,38 @@ namespace AnyRes
             }
         }
 
+        void SetScreenResolution()
+        {
+            if (xString != null && yString != null)
+            {
+                x = Convert.ToInt32(xString);
+                y = Convert.ToInt32(yString);
+
+                if (x > 0 && y > 0)
+                {
+                    GameSettings.SCREEN_RESOLUTION_HEIGHT = y;
+                    GameSettings.SCREEN_RESOLUTION_WIDTH = x;
+                    GameSettings.FULLSCREEN = fullScreen;
+                    GameSettings.SaveSettings();
+                    GameSettings.ApplySettings();
+                    Screen.SetResolution(x, y, fullScreen);
+
+                    SaveDataConfig(x, y, fullScreen);
+
+
+                    Debug.Log("[AnyRes] Set screen resolution");
+                }
+                else
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_AnyRes_One_or_both_of_your_value"), 1, ScreenMessageStyle.UPPER_CENTER);
+                }
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_AnyRes_The_values_you_have_set_a"), 1, ScreenMessageStyle.UPPER_CENTER);
+            }
+        }
+
         void GUIActive(int windowID)
         {
             GUILayout.BeginHorizontal();
@@ -181,39 +218,7 @@ namespace AnyRes
                 //			reloadScene = GUILayout.Toggle (reloadScene, "Reload scene");
                 if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Set_Screen_Resolution")))
                 {
-
-                    if (xString != null && yString != null)
-                    {
-
-                        x = Convert.ToInt32(xString);
-                        y = Convert.ToInt32(yString);
-
-                        if (x > 0 && y > 0)
-                        {
-
-                            GameSettings.SCREEN_RESOLUTION_HEIGHT = y;
-                            GameSettings.SCREEN_RESOLUTION_WIDTH = x;
-                            GameSettings.FULLSCREEN = fullScreen;
-                            GameSettings.SaveSettings();
-                            Log.Info("GUIActive.SetResolution, x: " + x + ", y: " + y + ", fullScreen: " + fullScreen);
-                            Screen.SetResolution(x, y, fullScreen);
-
-                            SaveDataConfig(x, y, fullScreen);
-
-
-                            Debug.Log("[AnyRes] Set screen resolution");
-                        }
-                        else
-                        {
-
-                            ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_AnyRes_One_or_both_of_your_value"), 1, ScreenMessageStyle.UPPER_CENTER);
-                        }
-                    }
-                    else
-                    {
-                        ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_AnyRes_The_values_you_have_set_a"), 1, ScreenMessageStyle.UPPER_CENTER);
-                    }
-
+                    SetScreenResolution();
                 }
                 if (nameString == "")
                     GUI.enabled = false;
@@ -267,6 +272,48 @@ namespace AnyRes
                     }
                 }
 
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Label(Localizer.Format("#LOC_AnyRes_UI_Scale") + "(" + (Mathf.Round(uiScale * 10f) * 10).ToString("F0") + ")", GUILayout.Width(90));
+                    uiScale = GUILayout.HorizontalSlider(uiScale, 0.8f, 2.0f, GUILayout.Width(100));
+                    if (GUILayout.Button("Apply"))
+                    {
+                        uiScale = Mathf.Round(uiScale * 10f) / 10f;
+                        float percentage = uiScale / GameSettings.UI_SCALE;
+                        Debug.Log("[AnyRes] UI Scale percentage: " + percentage);
+                        GameSettings.UI_SCALE_CREW = GameSettings.UI_SCALE_CREW * percentage;
+                        GameSettings.UI_SCALE_NAVBALL = GameSettings.UI_SCALE_NAVBALL * percentage;
+                        GameSettings.UI_SCALE_MODE = GameSettings.UI_SCALE_MODE * percentage;
+                        GameSettings.UI_SCALE_STAGINGSTACK = GameSettings.UI_SCALE_STAGINGSTACK * percentage;
+                        GameSettings.UI_SCALE_APPS = GameSettings.UI_SCALE_APPS * percentage;
+                        GameSettings.UI_SCALE_MAPOPTIONS = GameSettings.UI_SCALE_MAPOPTIONS * percentage;
+                        GameSettings.UI_SCALE_ALTIMETER = GameSettings.UI_SCALE_ALTIMETER * percentage;
+                        GameSettings.UI_SCALE_TIME = GameSettings.UI_SCALE_TIME * percentage;
+
+
+                        GameSettings.UI_SCALE = uiScale;
+                        SettingsLayoutConfig.SaveChanges();
+                        SettingsControlBase[] componentsInChildren = GetComponentsInChildren<SettingsControlBase>(includeInactive: true);
+                        int i = 0;
+                        for (int num = componentsInChildren.Length; i < num; i++)
+                        {
+                            componentsInChildren[i].OnApply();
+                        }
+                        GameSettings.SaveSettings();
+                        GameSettings.ApplySettings();
+                        GameEvents.OnGameSettingsApplied.Fire();
+
+                        //UIMasterController.Instance.SetScale(uiScale);
+                        //UIMasterController.Instance.SetAppScale(GameSettings.UI_SCALE_APPS);
+
+                        SaveDataConfig(x, y, GameSettings.FULLSCREEN);
+
+                        SetScreenResolution();
+                        uiScale = GameSettings.UI_SCALE;
+
+
+                    }
+                }
 
                 if (GUILayout.Button(Localizer.Format("#LOC_AnyRes_Close")))
                 {
@@ -276,7 +323,7 @@ namespace AnyRes
 
             using (new GUILayout.VerticalScope())
             {
-                scrollViewPos = GUILayout.BeginScrollView(scrollViewPos);
+                scrollViewPos = GUILayout.BeginScrollView(scrollViewPos, GUILayout.Width(150));
                 for (int i = resConfigs.Length - 1; i >= 0; --i)
                 {
                     if (deleteEnabled)
@@ -296,8 +343,6 @@ namespace AnyRes
                             SetScreenRes(resConfigs[i].node);
                             SetInitialRes.LastSetRes = resConfigs[i].node;
                             GameSettings.SaveSettings();
-
-                            Debug.Log("[AnyRes] Set screen resolution from preset");
                         }
                     }
                 }
@@ -324,7 +369,6 @@ namespace AnyRes
             GameSettings.SCREEN_RESOLUTION_HEIGHT = yVal;
             GameSettings.SCREEN_RESOLUTION_WIDTH = xVal;
             GameSettings.FULLSCREEN = fullscreen;
-            Log.Info("SetScreenRes.SetResolution, xVal: " + xVal + ", yVal: " + yVal + ", fullscreen: " + fullscreen);
             Screen.SetResolution(xVal, yVal, fullscreen);
             if (saveConfig)
             {
@@ -346,10 +390,9 @@ namespace AnyRes
             var files = UpdateFilesList(true);
             if (files.Length == 1)
             {
-                SetInitialRes.LastSetRes = resConfigs[0].node;
+                SetInitialRes.LastSetRes = files[0].node;
 
             }
-
         }
 
         #region NO_LOCALIZATION

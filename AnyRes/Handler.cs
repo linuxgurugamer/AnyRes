@@ -24,11 +24,8 @@ namespace AnyRes
                 initialResSet = initial;
                 dirPath = KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/AnyRes/PluginData/";
 
-
                 var files = AnyRes.UpdateFilesList(true);
-                if (files == null)
-                    Log.Error("files is null");
-                if (files.Length == 1)
+                if (files != null && files.Length == 1)
                 {
                     LastSetRes = files[0].node;
                 }
